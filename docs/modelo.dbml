@@ -334,9 +334,62 @@ Table app.usuario_modulo_permiso {
 //  edita debe apuntar a app.usuario (sección 5, ya entregada).
 // ============================================================================
 
-// Table app.corrida_modelo       { ... }
-// Table app.instruccion          { ... }
-// Table app.???                  { ... }
+Table app.corrida_modelo {
+  id_corrida     bigint [pk, increment]
+  ejecutada_en   timestamptz [not null, default: `now()`]
+  version_modelo varchar(40) [not null]
+  parametros     jsonb
+  estado         varchar(20) [not null, default: 'EN_CURSO', note: "EN_CURSO | COMPLETADA | FALLIDA"]
+  es_vigente     boolean [not null, default: false, note: "CHECK: solo si estado = COMPLETADA"]
+  indexes {
+    ejecutada_en [name: 'ix_corrida_ejecutada']
+    // UNIQUE INDEX ux_corrida_vigente ON ((TRUE)) WHERE es_vigente  -> una sola vigente
+  }
+  Note: 'Una fila por ejecución periódica del modelo. Solo una puede ser vigente.'
+}
+
+Table app.instruccion {
+  id_instruccion    bigint [pk, increment]
+  id_corrida        bigint [not null, ref: > app.corrida_modelo.id_corrida]
+  sk_articulo       bigint [not null, ref: > core.dim_articulo.sk_articulo]
+  sk_tienda_origen  bigint [not null, ref: > core.dim_tienda.sk_tienda]
+  sk_tienda_destino bigint [not null, ref: > core.dim_tienda.sk_tienda]
+  unidades_modelo   numeric(14,3) [not null, note: 'Propuesta ORIGINAL. Inmutable (trigger)']
+  comentario_modelo text [note: 'Inmutable (trigger)']
+  unidades          numeric(14,3) [not null, note: 'Valor vigente; = unidades_modelo hasta la primera edición']
+  comentario        text
+  estado            varchar(20) [not null, default: 'PROPUESTA', note: "PROPUESTA | EDITADA | APROBADA | DESCARTADA | EJECUTADA"]
+  modificado_por    bigint [ref: > app.usuario.id_usuario]
+  modificado_en     timestamptz
+  creado_en         timestamptz [not null, default: `now()`]
+  indexes {
+    (id_corrida, sk_articulo, sk_tienda_origen, sk_tienda_destino) [unique, name: 'ux_instruccion_propuesta']
+    id_corrida [name: 'ix_instruccion_corrida']
+    sk_articulo [name: 'ix_instruccion_articulo']
+  }
+  Note: 'CHECK origen <> destino, unidades > 0, estado en dominio; trigger: inmutabilidad, transiciones válidas, auditoría automática; sin DELETE.'
+}
+
+Table app.instruccion_auditoria {
+  id_auditoria   bigint [pk, increment]
+  id_instruccion bigint [not null, ref: > app.instruccion.id_instruccion]
+  campo          varchar(40) [not null, note: "unidades | comentario | estado"]
+  valor_anterior text
+  valor_nuevo    text
+  id_usuario     bigint [not null, ref: > app.usuario.id_usuario]
+  modificado_en  timestamptz [not null, default: `now()`]
+  indexes {
+    (id_instruccion, modificado_en) [name: 'ix_instruccion_auditoria_instr']
+    (id_usuario, modificado_en) [name: 'ix_instruccion_auditoria_usuario']
+  }
+  Note: 'Una fila por campo modificado. La escribe el trigger; es de solo inserción.'
+}
+
+// Vistas: app.v_instruccion_desviacion (indicador de confianza: delta y desviación relativa vs propuesta del modelo)
+//         app.v_instruccion_vigente   (instrucciones de la corrida vigente)
+
+
+
 
 // ============================================================================
 //  7. TODO — CAPA DE CONSUMO PARA KPIs  (schema analytics)  ⬜ TU ENTREGABLE
@@ -366,4 +419,57 @@ Table app.usuario_modulo_permiso {
 //  sacrificas. Documenta cada KPI en docs/KPIS.md.
 // ============================================================================
 
-// Table analytics.??? { ... }
+// Table analytics.mv_ventas_mes {
+  mes date
+  codigo_tienda varchar
+  codigo_articulo varchar
+  unidades numeric
+  venta_neta numeric
+  costo_venta numeric
+  lineas bigint
+  indexes { (mes, codigo_tienda, codigo_articulo) [unique, name: 'ux_mv_ventas_mes'] }
+  Note: 'MATERIALIZED VIEW. Grano: mes x tienda x artículo (por CÓDIGO, no sk). Sin ANULADAS. Refresco: tras cada corte de ventas. Ventas mensuales, margen, rotación, GMROI.'
+}
+
+Table analytics.mv_inventario_mes {
+  mes date
+  codigo_tienda varchar
+  codigo_articulo varchar
+  inv_promedio_mes numeric [note: 'promedio de cierres diarios']
+  valor_cierre_mes numeric [note: 'semi-aditivo: último día del mes']
+  dias_stockout int
+  dias_observados int
+  indexes { (mes, codigo_tienda, codigo_articulo) [unique, name: 'ux_mv_inventario_mes'] }
+  Note: 'MATERIALIZED VIEW. Grano: mes x tienda x artículo. Refresco: tras el cierre diario. Costo de inventario, rotación, GMROI, stockouts.'
+}
+
+Table analytics.v_dim_articulo_actual {
+  codigo_articulo varchar
+  categoria varchar
+  subcategoria varchar
+  Note: 'VIEW. 1 fila por código (versión vigente SCD2). Solo atributos de filtrado.'
+}
+
+Table analytics.v_dim_tienda_actual {
+  codigo_tienda varchar
+  region varchar
+  formato varchar
+  es_centro_distribucion boolean
+  Note: 'VIEW. 1 fila por código (versión vigente SCD2).'
+}
+
+Table analytics.v_cubo_kpi_mes {
+  mes date
+  codigo_tienda varchar
+  codigo_articulo varchar
+  Note: 'VIEW. Une las dos MV (FULL JOIN) + atributos vigentes. Grano: mes x tienda x artículo.'
+}
+
+Table analytics.v_kpi_mensual {
+  mes date
+  region varchar
+  formato varchar
+  categoria varchar
+  subcategoria varchar
+  Note: 'VIEW. Interfaz del dashboard: los 6 KPIs. Grano: mes x región x formato x categoría x subcategoría. Razones = cociente de sumas.'
+}
