@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from src.config.settings import PROJECT_ROOT, load_config, source_config
 from src.extractors.csv_extractor import build_extractor
-from src.loaders.fact_loaders import FullOnceLoader
+from src.loaders.fact_loaders import FullOnceLoader, UpsertLoader
 from src.pipelines.pipeline import Pipeline
 from src.quality.rules import REGLAS_VENTA, Validador
 from src.transformers.base import Chain
@@ -56,11 +56,18 @@ def ventas_historico(anio: int) -> Pipeline:
 
 
 def ventas_intradia(fecha: str, corte: str) -> Pipeline:
-    """Carga de un corte intradía. TODO — a implementar.
+    """Carga de un corte intradía. fecha 'AAAA-MM-DD'; corte '0800'|'1400'|'2000'.
 
-    corte: '0800' | '1400' | '2000'. Cada corte es acumulado del día.
-    Reutiliza VentaTransformer, REGLAS_VENTA y el patrón de `ventas_historico`;
-    lo que cambia es el loader (UpsertLoader) y el criterio de conflicto.
+    Cada corte es ACUMULADO y el origen corrige: el UpsertLoader conserva la
+    versión con mayor fecha_actualizacion, sin importar el orden de llegada.
+
+    · NO se omite el archivo por hash (a diferencia del histórico): el loader ya
+      es idempotente y un skip enmascararía justo esa propiedad. Sí se registra
+      el archivo (trazabilidad).
+    · No se usa Deduplicate: "último gana" perdería la versión más reciente; el
+      loader resuelve el lote por fecha_actualizacion.
+    · Ventas tardías: conservan el sk_fecha de su fecha_hora real (lo asigna
+      VentaTransformer). Ver DECISIONES.md.
     """
     nombre = "fct_venta_intradia"
     cfg = source_config(nombre)
@@ -82,7 +89,6 @@ def ventas_intradia(fecha: str, corte: str) -> Pipeline:
     )
     _al_terminar(pipeline, nombre, ruta)
     return pipeline
-
 
 
 # --------------------------------------------------------------------------
