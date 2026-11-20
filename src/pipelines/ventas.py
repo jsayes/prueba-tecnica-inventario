@@ -62,7 +62,27 @@ def ventas_intradia(fecha: str, corte: str) -> Pipeline:
     Reutiliza VentaTransformer, REGLAS_VENTA y el patrón de `ventas_historico`;
     lo que cambia es el loader (UpsertLoader) y el criterio de conflicto.
     """
-    raise NotImplementedError("TODO: implementar")
+    nombre = "fct_venta_intradia"
+    cfg = source_config(nombre)
+    ruta = PROJECT_ROOT / cfg["path_pattern"].format(
+        fecha_archivo=fecha.replace("-", ""), corte=corte
+    )
+    quality = load_config()["quality"]
+
+    pipeline = Pipeline(
+        nombre=nombre,
+        extractor=build_extractor(cfg["extractor"], path=ruta),
+        transformer=VentaTransformer(DimensionResolver().cargar()),
+        loader=UpsertLoader(
+            cfg["target"], cfg["natural_key"], COLUMNAS_VENTA,
+            cfg.get("update_column", "fecha_actualizacion"),
+        ),
+        validador=Validador(REGLAS_VENTA, quality.get("max_reject_ratio")),
+        parametros={"fecha": fecha, "corte": corte},
+    )
+    _al_terminar(pipeline, nombre, ruta)
+    return pipeline
+
 
 
 # --------------------------------------------------------------------------
