@@ -68,6 +68,68 @@ class FullOnceLoader(BaseLoader):
         logger.info("%s: %s filas enviadas", self.target, len(filas))
         return len(filas)
 
+
+class SnapshotLoader(BaseLoader):
+    """Carga de un snapshot completo. IMPLEMENTADO COMO REFERENCIA.
+
+    El snapshot de inventario es una fotografía de un instante: reemplazar su
+    alcance (fecha + hora) es la operación natural y hace la carga idempotente
+    sin necesidad de resolver conflictos fila por fila. Todo ocurre en una
+    transacción.
+
+    Compáralo con el caso de ventas: ahí los cortes son ACUMULADOS y el origen
+    corrige registros individuales, así que reemplazar el alcance perdería la
+    información de qué versión es la más reciente. Por eso ventas necesita
+    upsert y esto no.
+    """
+
+    def __init__(
+        self,
+        target: str,
+        natural_key: list[str],
+        columns: Sequence[str],
+        scope_columns: Sequence[str],
+    ) -> None:
+        super().__init__(target, natural_key)
+        self.columns = list(columns)
+        self.scope_columns = list(scope_columns)
+
+    def load(self, records: Iterable[dict]) -> int:
+        filas = [tuple(r.get(c) for c in self.columns) for r in records]
+        if not filas:
+            logger.warning("%s: el snapshot llegó vacío; no se carga nada", self.target)
+            return 0
+
+        primero = records[0] if isinstance(records, list) else None
+        alcance = {c: (primero or {}).get(c) for c in self.scope_columns}
+        if any(v is None for v in alcance.values()):
+            raise ValueError(f"No se pudo determinar el alcance del snapshot: {alcance}")
+
+        where = " AND ".join(f"{c} = %s" for c in self.scope_columns)
+        cols = ", ".join(self.columns)
+        placeholders = ", ".join(["%s"] * len(self.columns))
+
+        with connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"DELETE FROM {self.target} WHERE {where}",  # noqa: S608
+                    tuple(alcance[c] for c in self.scope_columns),
+                )
+                borradas = cur.rowcount
+                for i in range(0, len(filas), 5000):
+                    cur.executemany(
+                        f"INSERT INTO {self.target} ({cols}) VALUES ({placeholders})",  # noqa: S608
+                        filas[i : i + 5000],
+                    )
+            conn.commit()
+
+        logger.info(
+            "%s alcance %s: %s borradas, %s insertadas",
+            self.target, alcance, borradas, len(filas),
+        )
+        return len(filas)
+
+
 class SnapshotIncompleto(Exception):
     """El snapshot no alcanza el umbral de completitud: se descarta completo."""
 
@@ -191,3 +253,4 @@ class SnapshotCompletoLoader(BaseLoader):
                 f"(mínimo {self.min_ratio:.0%}); no se carga"
             )
         return self.inner.load(registros)
+
