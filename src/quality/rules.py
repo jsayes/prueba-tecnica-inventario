@@ -89,4 +89,21 @@ REGLAS_VENTA: list[Regla] = [
 #     (¿se rechaza el registro o se trunca a cero?) y documentarlo
 #   - costo_promedio no negativo
 # ---------------------------------------------------------------------------
-REGLAS_INVENTARIO: list[Regla] = []
+REGLAS_INVENTARIO: list[Regla] = [
+    ("llave_natural_completa",
+     _no_nulo("sk_fecha", "hora_snapshot", "codigo_tienda", "codigo_articulo")),
+    ("articulo_existe_en_dimension", _no_nulo("sk_articulo")),
+    ("tienda_existe_en_dimension", _no_nulo("sk_tienda")),
+    ("unidades_disponibles_no_nula", _no_nulo("unidades_disponibles")),
+    ("unidades_disponibles_no_negativas", lambda r: r["unidades_disponibles"] >= 0),
+    ("transito_y_comprometidas_no_negativas",
+     lambda r: r["unidades_transito"] >= 0 and r["unidades_comprometidas"] >= 0),
+    ("costo_promedio_no_negativo",
+     lambda r: r.get("costo_promedio") is None or r["costo_promedio"] >= 0),
+]
+
+## Decisión sobre unidades negativas: se rechazan a cuarentena, no
+# se truncan a cero. Truncar oculta una falla del origen y falsea el valor del
+# inventario y la tasa de stockouts (un -5 convertido en 0 parece "agotado").
+# El orden importa: las de nulidad van primero porque el Validador trata una
+# excepción como rechazo y las comparaciones asumen valores no nulos
