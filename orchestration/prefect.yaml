@@ -20,22 +20,58 @@ deployments:
         timezone: "America/Guatemala"
     parameters: {}
 
-  # - name: ventas-intradia
-  #   entrypoint: orchestration/flows/etl_flows.py:flujo_ventas
-  #   work_pool: { name: default }
-  #   schedules:
-  #     - cron: "?? ? * * *"       # TODO: 3 cortes al día
-  #   parameters: { corte: "0800" }
+  #  Ventas Intradia
+  - name: ventas-0800
+    entrypoint: orchestration/flows/etl_flows.py:flujo_ventas
+    work_pool: { name: default }
+    schedules:
+      - cron: "10 8 * * *"
+        timezone: "America/Guatemala"
+    parameters: { corte: "0800" }
+    concurrency_limit: { limit: 1, collision_strategy: ENQUEUE }
 
-  # - name: inventario-intradia
-  #   entrypoint: orchestration/flows/etl_flows.py:flujo_inventario
-  #   work_pool: { name: default }
-  #   schedules:
-  #     - cron: "?/?? * * * *"     # TODO: cada 30 minutos
-  #   concurrency_limit: 1         # TODO: ¿es lo correcto? justifícalo
+  - name: ventas-1400
+    entrypoint: orchestration/flows/etl_flows.py:flujo_ventas
+    work_pool: { name: default }
+    schedules:
+      - cron: "10 14 * * *"
+        timezone: "America/Guatemala"
+    parameters: { corte: "1400" }
+    concurrency_limit: { limit: 1, collision_strategy: ENQUEUE }
 
-  # - name: cierre-diario
-  #   entrypoint: orchestration/flows/etl_flows.py:flujo_cierre
-  #   work_pool: { name: default }
-  #   schedules:
-  #     - cron: "?? ?? * * *"      # TODO: después del último snapshot
+  - name: ventas-2000
+    entrypoint: orchestration/flows/etl_flows.py:flujo_ventas
+    work_pool: { name: default }
+    schedules:
+      - cron: "10 20 * * *"
+        timezone: "America/Guatemala"
+    parameters: { corte: "2000" }
+    concurrency_limit: { limit: 1, collision_strategy: ENQUEUE }
+
+  # Inventario
+  - name: inventario-intradia
+    entrypoint: orchestration/flows/etl_flows.py:flujo_inventario
+    work_pool: { name: default }
+    schedules:
+      - cron: "2,32 6-23 * * *"
+        timezone: "America/Guatemala"
+    parameters: {}
+    concurrency_limit: { limit: 1, collision_strategy: ENQUEUE }
+
+# Cierre
+  - name: cierre-diario
+    entrypoint: orchestration/flows/etl_flows.py:flujo_cierre
+    work_pool: { name: default }
+    schedules:
+      - cron: "30 0 * * *"
+        timezone: "America/Guatemala"
+    parameters: {}
+
+  # Refresco de vistas materializadas.
+  - name: refresco-kpis
+    entrypoint: orchestration/flows/etl_flows.py:flujo_refresco_kpis
+    work_pool: { name: default }
+    schedules:
+      - cron: "45 0 * * *"
+        timezone: "America/Guatemala"
+    parameters: {}
