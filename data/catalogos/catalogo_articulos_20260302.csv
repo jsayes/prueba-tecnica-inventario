@@ -1,0 +1,127 @@
+codigo_articulo,descripcion,codigo_categoria,categoria,subcategoria,marca,unidad_medida,costo_estandar,precio_lista,en_modelo,activo
+ART-00001,Del Valle Enlatados 500ml,ABA,Abarrotes,Enlatados,Vital,  UN ,170.80,226.50,1,1
+ART-00002,Del Valle Gaseosas 1kg,BEB,Bebidas,Gaseosas,Sabemas,UN,184.64,226.35,0,1
+ART-00003,La Cumbre Detergentes pack 12,LIM,Limpieza,Detergentes,Econo,  UN ,13.93,19.35,1,1
+ART-00004,Primera Detergentes unidad,LIM,Limpieza,Detergentes,La Cumbre,PQ,12.25,15.46,false,1
+ART-00005,Econo Aguas 1L,BEB,Bebidas,Aguas,Del Valle,  UN ,104.27,144.65,SI,1
+ART-00006,Primera Enlatados 500ml,ABA,Abarrotes,Enlatados,Primera,CJ,Q 20.70,29.88,false,1
+ART-00007,Sabemas Detergentes 250g,LIM,Limpieza,Detergentes,Norteña,CJ,159.93,224.94,0,1
+ART-00008,Sabemas Quesos 250g,LAC,Lacteos,Quesos,Econo,un,17.95,23.18,true,1
+ART-00009,Vital Aguas 250g,BEB,Bebidas,Aguas,La Cumbre,un,24.34,32.49,false,1
+ART-00010,Vital Frituras unidad,SNK,Snacks,Frituras,Norteña,PQ,17.20,23.85,NO,1
+ART-00011,Vital Papel 500ml,LIM,Limpieza,Papel,Norteña,un,Q 105.85,142.77,NO,1
+ART-00012,PRIMERA GASEOSAS PACK 12 (NUEVA PRESENTACION),BEB,Bebidas,Gaseosas,Vital,un,139.64,182.61,true,1
+ART-00013,Norteña Frituras 1L,SNK,Snacks,Frituras,Primera,UN,64.75,98.94,false,1
+ART-00014,Sabemas Granos basicos unidad,ABA,Abarrotes,Granos basicos,Sabemas,UN,26.33,33.48,0,1
+ART-00015,Sabemas Higiene oral unidad,CUI,Cuidado personal,Higiene oral,Primera,PQ,52.54,64.66,NO,1
+ART-00016,La Cumbre Enlatados 1L,ABA,Abarrotes,Enlatados,Del Valle,CJ,124.00,163.77,0,1
+ART-00017,La Cumbre Quesos 250g,LAC,Lacteos,Quesos,Norteña,UN,Q 6.06,8.38,0,1
+ART-00018,La Cumbre Enlatados pack 12,ABA,Abarrotes,Enlatados,Vital,  UN ,111.13,144.23,SI,1
+ART-00019,Vital Galletas unidad,SNK,Snacks,Galletas,Econo,  UN ,15.10,20.93,false,1
+ART-00020,Del Valle Detergentes 1L,LIM,Limpieza,Detergentes,Del Valle,CJ,21.77,30.80,false,1
+ART-00021,Primera Enlatados 1L,ABA,Abarrotes,Enlatados,Primera,UN,113.53,167.33,true,1
+ART-00022,La Cumbre Aguas pack 12,BEB,Bebidas,Aguas,Norteña,PQ,173.34,252.16,SI,1
+ART-00023,Sabemas Aguas 1kg,BEB,Bebidas,Aguas,Sabemas,PQ,23.86,32.46,1,1
+ART-00024,Vital Galletas pack 12,SNK,Snacks,Galletas,La Cumbre,  UN ,63.98,81.76,1,1
+ART-00025,Del Valle Higiene oral unidad,CUI,Cuidado personal,Higiene oral,Primera,PQ,67.35,96.67,NO,1
+ART-00026,La Cumbre Galletas 250g,SNK,Snacks,Galletas,Vital,CJ,152.72,209.50,SI,1
+ART-00027,Vital Higiene oral unidad,CUI,Cuidado personal,Higiene oral,Vital,CJ,61.69,77.89,0,1
+ART-00028,Sabemas Galletas 250g,SNK,Snacks,Galletas,Econo,UN,145.29,182.19,1,1
+ART-00029,Norteña Papel 1kg,LIM,Limpieza,Papel,Vital,PQ,49.24,70.72,true,1
+ART-00030,La Cumbre Aguas 1kg,BEB,Bebidas,Aguas,Primera,  UN ,43.54,54.55,1,1
+ART-00031,Vital Frituras pack 12,SNK,Snacks,Frituras,Del Valle,un,64.22,91.06,NO,1
+ART-00032,Econo Papel 250g,LIM,Limpieza,Papel,Del Valle,un,160.41,215.04,0,1
+ART-00033,La Cumbre Aguas 500ml,BEB,Bebidas,Aguas,La Cumbre,  UN ,131.43,163.35,false,1
+ART-00034,Sabemas Leches pack 12,LAC,Lacteos,Leches,Norteña,CJ,111.44,156.07,SI,1
+ART-00035,Econo Gaseosas 500ml,BEB,Bebidas,Gaseosas,Primera,CJ,6.01,9.25,false,0
+ART-00036,Norteña Quesos 1L,LAC,Lacteos,Quesos,Norteña,  UN ,149.32,187.86,0,1
+ART-00037,La Cumbre Enlatados 500ml,ABA,Abarrotes,Enlatados,Econo,PQ,49.28,65.79,false,1
+ART-00038,Primera Higiene oral 1L,CUI,Cuidado personal,Higiene oral,Primera,CJ,77.74,118.13,SI,1
+ART-00039,Vital Papel unidad,LIM,Limpieza,Papel,La Cumbre,CJ,140.55,197.50,0,1
+ART-00040,Econo Galletas pack 6,SNK,Snacks,Galletas,Primera,  UN ,24.74,29.76,1,1
+ART-00041,La Cumbre Aguas 250g,BEB,Bebidas,Aguas,Del Valle,UN,Q 159.39,191.43,SI,1
+ART-00042,Sabemas Gaseosas 250g,BEB,Bebidas,Gaseosas,Primera,  UN ,137.64,208.89,SI,1
+ART-00043,Vital Galletas 1kg,SNK,Snacks,Galletas,Primera,CJ,52.42,71.71,NO,1
+ART-00044,La Cumbre Granos basicos unidad,ABA,Abarrotes,Granos basicos,Sabemas,CJ,166.37,251.27,false,1
+ART-00045,Sabemas Papel 500ml,LIM,Limpieza,Papel,La Cumbre,PQ,59.27,84.66,1,1
+ART-00046,NORTEÑA LECHES 1L (NUEVA PRESENTACION),LAC,Lacteos,Leches,Norteña,CJ,169.32,240.11,false,1
+ART-00047,ECONO AGUAS UNIDAD (NUEVA PRESENTACION),BEB,Bebidas,Aguas,La Cumbre,CJ,80.25,114.44,NO,1
+ART-00048,Norteña Higiene oral 250g,CUI,Cuidado personal,Higiene oral,Del Valle,PQ,86.93,126.28,1,1
+ART-00049,Norteña Papel pack 6,LIM,Limpieza,Papel,Primera,PQ,81.24,96.41,SI,0
+ART-00050,Del Valle Aguas 500ml,BEB,Bebidas,Aguas,Norteña,PQ,177.37,261.03,0,1
+ART-00051,Sabemas Leches unidad,LAC,Lacteos,Leches,Econo,PQ,53.09,78.65,false,1
+ART-00052,Del Valle Higiene oral 250g,CUI,Cuidado personal,Higiene oral,Del Valle,CJ,104.21,149.97,false,1
+ART-00053,Vital Granos basicos 250g,ABA,Abarrotes,Granos basicos,Del Valle,  UN ,169.12,239.26,0,1
+ART-00054,Primera Aguas 1kg,BEB,Bebidas,Aguas,Norteña,  UN ,83.59,109.13,0,1
+ART-00055,La Cumbre Galletas 250g,SNK,Snacks,Galletas,Del Valle,CJ,45.58,55.63,1,0
+ART-00056,NORTEÑA FRITURAS 1KG (NUEVA PRESENTACION),SNK,Snacks,Frituras,Primera,CJ,57.33,83.76,true,1
+ART-00057,Del Valle Gaseosas pack 12,BEB,Bebidas,Gaseosas,Primera,  UN ,179.03,213.70,1,1
+ART-00058,Vital Quesos pack 12,LAC,Lacteos,Quesos,Sabemas,un,168.46,205.41,0,1
+ART-00059,La Cumbre Detergentes 1L,LIM,Limpieza,Detergentes,Norteña,CJ,200.77,289.39,NO,1
+ART-00060,Del Valle Leches unidad,LAC,Lacteos,Leches,La Cumbre,UN,74.93,98.05,1,1
+ART-00061,Econo Granos basicos unidad,ABA,Abarrotes,Granos basicos,Sabemas,  UN ,79.53,95.48,NO,0
+ART-00062,Sabemas Shampoo 1L,CUI,Cuidado personal,Shampoo,La Cumbre,PQ,46.25,59.59,false,1
+ART-00063,Primera Enlatados 250g,ABA,Abarrotes,Enlatados,La Cumbre,UN,173.26,266.80,true,1
+ART-00064,Sabemas Leches 250g,LAC,Lacteos,Leches,Primera,CJ,3.69,4.88,0,1
+ART-00065,La Cumbre Gaseosas 1kg,BEB,Bebidas,Gaseosas,Primera,UN,21.08,27.76,0,1
+ART-00066,Primera Granos basicos unidad,ABA,Abarrotes,Granos basicos,Vital,CJ,Q 114.64,138.86,NO,1
+ART-00067,Sabemas Shampoo 1L,CUI,Cuidado personal,Shampoo,Norteña,  UN ,72.25,93.97,NO,1
+ART-00068,Econo Galletas pack 12,SNK,Snacks,Galletas,Vital,  UN ,160.93,227.25,0,1
+ART-00069,Del Valle Higiene oral unidad,CUI,Cuidado personal,Higiene oral,Econo,  UN ,103.84,153.76,NO,1
+ART-00070,Del Valle Galletas 1L,SNK,Snacks,Galletas,Econo,PQ,116.97,141.71,1,1
+ART-00071,Econo Papel pack 6,LIM,Limpieza,Papel,Econo,CJ,118.79,165.36,false,1
+ART-00072,Primera Papel pack 6,LIM,Limpieza,Papel,Del Valle,  UN ,144.29,210.21,1,1
+ART-00073,Norteña Papel 1L,LIM,Limpieza,Papel,Econo,CJ,48.01,57.97,0,1
+ART-00074,Sabemas Papel pack 12,LIM,Limpieza,Papel,Norteña,UN,98.13,122.52,SI,1
+ART-00075,Norteña Quesos pack 12,LAC,Lacteos,Quesos,Econo,PQ,17.17,21.20,0,1
+ART-00076,Econo Gaseosas 500ml,BEB,Bebidas,Gaseosas,Econo,CJ,88.65,120.54,NO,1
+ART-00077,Sabemas Galletas unidad,SNK,Snacks,Galletas,Del Valle,  UN ,94.67,127.99,0,1
+ART-00078,Sabemas Aguas 500ml,BEB,Bebidas,Aguas,Vital,  UN ,168.75,200.22,false,0
+ART-00079,La Cumbre Detergentes 500ml,LIM,Limpieza,Detergentes,Primera,UN,40.54,62.02,0,1
+ART-00080,Vital Granos basicos pack 12,ABA,Abarrotes,Granos basicos,Primera,PQ,197.81,248.80,1,1
+ART-00081,Sabemas Quesos 500ml,LAC,Lacteos,Quesos,La Cumbre,UN,91.38,137.45,false,1
+ART-00082,Norteña Detergentes 1kg,LIM,Limpieza,Detergentes,Norteña,UN,Q 56.79,69.97,true,1
+ART-00083,La Cumbre Enlatados pack 12,ABA,Abarrotes,Enlatados,Del Valle,PQ,170.13,214.16,true,1
+ART-00084,Del Valle Detergentes 250g,LIM,Limpieza,Detergentes,Sabemas,PQ,72.36,108.68,1,1
+ART-00085,La Cumbre Gaseosas 1L,BEB,Bebidas,Gaseosas,Norteña,un,150.82,193.91,0,1
+ART-00086,Del Valle Enlatados unidad,ABA,Abarrotes,Enlatados,Vital,un,142.08,190.14,SI,1
+ART-00087,Sabemas Galletas 1kg,SNK,Snacks,Galletas,Primera,CJ,17.72,27.03,NO,1
+ART-00088,La Cumbre Papel 1L,LIM,Limpieza,Papel,Sabemas,un,12.14,18.49,true,1
+ART-00089,Norteña Granos basicos 1kg,ABA,Abarrotes,Granos basicos,Econo,CJ,133.94,206.43,true,1
+ART-00090,La Cumbre Frituras 500ml,SNK,Snacks,Frituras,La Cumbre,  UN ,73.11,90.80,false,1
+ART-00091,Sabemas Papel 1kg,LIM,Limpieza,Papel,La Cumbre,  UN ,163.45,253.13,0,1
+ART-00092,La Cumbre Leches 250g,LAC,Lacteos,Leches,Norteña,  UN ,63.86,77.51,0,1
+ART-00093,Econo Galletas pack 6,SNK,Snacks,Galletas,La Cumbre,un,Q 157.16,207.71,true,1
+ART-00094,Norteña Gaseosas 1L,BEB,Bebidas,Gaseosas,Econo,  UN ,Q 91.42,127.30,SI,1
+ART-00095,Sabemas Quesos 1kg,LAC,Lacteos,Quesos,Econo,un,22.44,31.42,false,0
+ART-00096,Vital Gaseosas unidad,BEB,Bebidas,Gaseosas,Sabemas,  UN ,25.96,34.72,false,1
+ART-00097,Primera Detergentes unidad,LIM,Limpieza,Detergentes,Sabemas,un,167.69,255.46,0,1
+ART-00098,Econo Quesos 500ml,LAC,Lacteos,Quesos,Vital,un,30.75,42.23,1,1
+ART-00099,Primera Gaseosas 500ml,BEB,Bebidas,Gaseosas,Econo,PQ,4.02,5.84,0,1
+ART-00100,Del Valle Higiene oral 500ml,CUI,Cuidado personal,Higiene oral,Del Valle,PQ,Q 115.81,166.59,SI,0
+ART-00101,Primera Quesos 500ml,LAC,Lacteos,Quesos,Del Valle,  UN ,72.00,90.92,true,0
+ART-00102,La Cumbre Granos basicos 1kg,ABA,Abarrotes,Granos basicos,Primera,CJ,172.75,245.04,SI,1
+ART-00103,Del Valle Detergentes 1L,LIM,Limpieza,Detergentes,Sabemas,un,127.87,165.43,1,1
+ART-00104,Sabemas Frituras 500ml,SNK,Snacks,Frituras,Econo,PQ,86.30,118.20,NO,1
+ART-00105,Norteña Frituras pack 12,SNK,Snacks,Frituras,Vital,  UN ,73.46,86.87,1,1
+ART-00106,La Cumbre Quesos 1kg,LAC,Lacteos,Quesos,La Cumbre,PQ,58.52,86.81,true,1
+ART-00107,La Cumbre Shampoo 1kg,CUI,Cuidado personal,Shampoo,Sabemas,UN,91.00,113.69,SI,1
+ART-00108,Primera Detergentes 1L,LIM,Limpieza,Detergentes,Sabemas,UN,13.09,15.56,NO,1
+ART-00109,Norteña Detergentes pack 12,LIM,Limpieza,Detergentes,Del Valle,UN,82.86,119.60,0,1
+ART-00110,Sabemas Leches 500ml,LAC,Lacteos,Leches,Norteña,un,136.07,189.78,true,0
+ART-00111,Norteña Papel 500ml,LIM,Limpieza,Papel,Norteña,un,33.37,39.41,1,1
+ART-00112,Norteña Quesos unidad,LAC,Lacteos,Quesos,Vital,un,70.59,103.37,1,1
+ART-00113,Sabemas Papel 1L,LIM,Limpieza,Papel,Norteña,PQ,38.04,52.51,NO,1
+ART-00114,Econo Gaseosas unidad,BEB,Bebidas,Gaseosas,Sabemas,UN,121.40,148.13,false,1
+ART-00115,La Cumbre Aguas pack 12,BEB,Bebidas,Aguas,Del Valle,  UN ,145.29,174.78,true,1
+ART-00116,Norteña Enlatados pack 12,ABA,Abarrotes,Enlatados,Econo,PQ,172.53,242.97,true,1
+ART-00117,Econo Galletas 500ml,SNK,Snacks,Galletas,Del Valle,CJ,136.87,207.92,1,1
+ART-00118,Norteña Papel 1kg,LIM,Limpieza,Papel,Vital,un,171.87,227.39,0,0
+ART-00119,Norteña Leches unidad,LAC,Lacteos,Leches,Econo,CJ,Q 5.04,7.68,SI,1
+ART-00120,Primera Enlatados 500ml,ABA,Abarrotes,Enlatados,Primera,CJ,89.28,133.13,false,1
+ART-00121,Vital Aguas 750ml,ABA,Abarrotes,Enlatados,Vital,  UN ,170.80,226.50,1,1
+ART-00103,Del Valle Detergentes 1L,LIM,Limpieza,Detergentes,Sabemas,un,127.87,165.43,1,1
+ART-00057,Del Valle Gaseosas pack 12,BEB,Bebidas,Gaseosas,Primera,  UN ,179.03,213.70,1,1
+ART-00065,La Cumbre Gaseosas 1kg,BEB,Bebidas,Gaseosas,Primera,UN,21.08,27.76,0,1
+ART-00066,Primera Granos basicos unidad,ABA,Abarrotes,Granos basicos,Vital,CJ,114.64,138.86,NO,1
+ART-00085,La Cumbre Gaseosas 1L,BEB,Bebidas,Gaseosas,Norteña,un,150.82,193.91,0,1

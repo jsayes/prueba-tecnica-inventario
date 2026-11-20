@@ -1,0 +1,25 @@
+# ============================================================================
+#  Punto de partida alternativo para orquestar con Airflow (modo standalone,
+#  suficiente para la prueba; no es una configuración productiva).
+#  Uso:  docker compose -f docker-compose.yml -f docker-compose.airflow.yml up -d
+#  TODO (candidato): completar dependencias, conexiones y variables.
+# ============================================================================
+services:
+  airflow:
+    image: apache/airflow:2.9.2-python3.11
+    container_name: inv_airflow
+    command: standalone
+    env_file: .env
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      POSTGRES_HOST: postgres
+      PYTHONPATH: /opt/airflow/project
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./orchestration/dags:/opt/airflow/dags
+      - ./:/opt/airflow/project
+    depends_on:
+      postgres:
+        condition: service_healthy

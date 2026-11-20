@@ -1,0 +1,86 @@
+# ---------------------------------------------------------------------------
+# Declaración de fuentes y flujos.
+# Objetivo del diseño: agregar una fuente nueva debe ser agregar un bloque
+# aquí más, a lo sumo, un extractor o loader nuevo; nunca tocar los pipelines.
+# ---------------------------------------------------------------------------
+
+sources:
+
+  # ---------------- dimensiones (implementadas como referencia) -------------
+  dim_articulo:
+    extractor: csv
+    path_pattern: "data/catalogos/catalogo_articulos_{fecha_archivo}.csv"
+    load_mode: scd2
+    target: core.dim_articulo
+    natural_key: [codigo_articulo]
+    tracked_columns:          # cambios en estas columnas abren versión nueva
+      - descripcion
+      - categoria
+      - subcategoria
+      - marca
+      - costo_estandar
+      - precio_lista
+      - en_modelo
+      - activo
+    transform:
+      trim: "*"
+      rename:
+        codigo_articulo: codigo_articulo
+      numeric: [costo_estandar, precio_lista]
+      boolean: [en_modelo, activo]
+      upper: [codigo_articulo, unidad_medida]
+
+  dim_tienda:
+    extractor: csv
+    path_pattern: "data/catalogos/catalogo_tiendas_{fecha_archivo}.csv"
+    load_mode: scd2
+    target: core.dim_tienda
+    natural_key: [codigo_tienda]
+    tracked_columns:
+      - nombre_tienda
+      - departamento
+      - region
+      - formato
+      - es_centro_distribucion
+      - activa_modelo
+      - metros_cuadrados
+    transform:
+      trim: "*"
+      numeric: [metros_cuadrados]
+      boolean: [es_centro_distribucion, activa_modelo]
+      date: [fecha_apertura]
+      upper: [codigo_tienda]
+
+  # ---------------- hechos (TODO: a implementar por el candidato) ----------
+  fct_venta_historico:
+    extractor: csv
+    path_pattern: "data/ventas/historico/ventas_{anio}.csv"
+    load_mode: full_once            # carga única, idempotente por archivo
+    target: core.fct_venta
+    natural_key: [id_transaccion, linea]
+
+  fct_venta_intradia:
+    extractor: csv
+    path_pattern: "data/ventas/intradia/ventas_{fecha_archivo}_{corte}.csv"
+    load_mode: upsert               # 3 cortes por día, acumulados
+    target: core.fct_venta
+    natural_key: [id_transaccion, linea]
+    update_column: fecha_actualizacion
+
+  fct_inventario_historico:
+    extractor: csv
+    path_pattern: "data/inventario/historico/inventario_{periodo}.csv"
+    load_mode: full_once
+    target: core.fct_inventario_diario
+    natural_key: [fecha_snapshot, codigo_tienda, codigo_articulo]
+
+  fct_inventario_intradia:
+    extractor: csv
+    path_pattern: "data/inventario/intradia/inventario_{fecha_archivo}_{hora}.csv"
+    load_mode: upsert               # snapshot cada 30 minutos
+    target: core.fct_inventario_intradia
+    natural_key: [fecha_snapshot, hora_snapshot, codigo_tienda, codigo_articulo]
+
+quality:
+  on_reject: quarantine      # quarantine | fail | skip
+  max_reject_ratio: 0.05     # si se supera, el flujo debe fallar

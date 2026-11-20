@@ -1,0 +1,20 @@
+codigo_tienda,nombre_tienda,departamento,region,formato,es_centro_distribucion,activa_modelo,metros_cuadrados,fecha_apertura
+T001,CEDIS Sacatepéquez 1,Quetzaltenango,Centro,CEDIS,1,1,2093,2019-04-22
+T002,CEDIS Sacatepéquez 2,Quetzaltenango,Centro,CEDIS,1,0,1204,2013-11-19
+T003,CEDIS Sacatepéquez 3,Guatemala,Norte,CEDIS,1,0,1950,2015-11-19
+T004,Tienda Sacatepéquez 4,Sacatepéquez,Norte,Super,NO,true,1082,2014-09-19
+T005,Tienda Escuintla 5,Escuintla,Oriente,Mayoreo,false,1,1186,2016-06-19
+ t006 ,Tienda Quetzaltenango 6,Sacatepéquez,Occidente,Express,0,1,2488,2016-03-22
+T007,Tienda Escuintla 7,Guatemala,Norte,Super,0,1,1067,2014-04-03
+T008,Tienda Alta Verapaz 8,Quetzaltenango,Centro,Express,0,1,1066,2022-01-20
+T009,Tienda Escuintla 9,Guatemala,Oriente,Express,0,1,,2016-05-09
+T010,Tienda Guatemala 10,Escuintla,Sur,Express,false,1,145,2014-05-16
+T011,Tienda Alta Verapaz 11,Petén,Sur,Super,0,1,1512,2015-03-04
+T012,Tienda Guatemala 12,Sacatepéquez,Oriente,Express,NO,0,953,2012-04-03
+T013,Tienda Escuintla 13,Quetzaltenango,Oriente,Express,NO,0,953,2012-09-14
+T014,Tienda Quetzaltenango 14,Petén,Norte,Express,false,1,1739,2015-06-20
+T015,Tienda Alta Verapaz 15,Petén,Centro,Mayoreo,0,1,1230,2021-03-10
+T016,Tienda Escuintla 16,Alta Verapaz,Oriente,Super,0,1,2440,2020-01-05
+T017,Tienda Quetzaltenango 17,Quetzaltenango,Centro,Super,NO,1,1778,2016-07-26
+T018,Tienda Guatemala 18,Quetzaltenango,Occidente,Super,0,true,,2021-02-09
+T008,Tienda Alta Verapaz 8,Quetzaltenango,Centro,Express,0,1,1066,2022-01-20

@@ -1,0 +1,369 @@
+// ============================================================================
+//  Modelo de datos — Aplicación de inventario óptimo
+//  Formato: DBML (https://dbdiagram.io)
+//
+//  ESTADO: BASE INCOMPLETA.
+//  Las secciones 1 a 5 están definidas y ya existen en la base de datos
+//  (ver sql/). Tu entregable de modelado son las SECCIONES 6 (instrucciones y
+//  su auditoría) y 7 (capa de consumo para los KPIs): complétalas en este
+//  DBML y escribe su DDL en sql/05_ddl_app.sql y sql/06_analytics.sql.
+//
+//  Reglas:
+//   - No cambies el estilo ni las convenciones de las secciones existentes:
+//     snake_case, prefijos dim_/fct_, llaves surrogadas sk_, tipos explícitos.
+//   - Todo lo que agregues debe tener PK, FKs, tipos correctos y comentarios.
+//   - Si necesitas modificar algo de lo existente, hazlo y justifícalo en
+//     docs/MODELO.md (no está prohibido, está sujeto a defensa).
+// ============================================================================
+
+Project inventario_optimo {
+  database_type: 'PostgreSQL'
+  note: 'Capas: raw (aterrizaje), core (modelo dimensional), analytics (consumo), etl (control)'
+}
+
+// ============================================================================
+//  1. DIMENSIONES  (definidas — schema core)
+// ============================================================================
+
+Table core.dim_fecha {
+  sk_fecha            integer      [pk, note: 'AAAAMMDD']
+  fecha               date         [not null, unique]
+  anio                smallint     [not null]
+  trimestre           smallint     [not null]
+  mes                 smallint     [not null]
+  nombre_mes          varchar(20)  [not null]
+  dia                 smallint     [not null]
+  dia_semana          smallint     [not null, note: '1=lunes ... 7=domingo']
+  nombre_dia          varchar(20)  [not null]
+  semana_iso          smallint     [not null]
+  es_fin_semana       boolean      [not null]
+  primer_dia_mes      date         [not null]
+  ultimo_dia_mes      date         [not null]
+  note: 'Dimensión de calendario. Se puebla una sola vez con sql/03_seed_dim_fecha.sql'
+}
+
+Table core.dim_articulo {
+  sk_articulo         bigint       [pk, increment]
+  codigo_articulo     varchar(30)  [not null, note: 'Llave natural del origen']
+  descripcion         varchar(200)
+  codigo_categoria    varchar(10)
+  categoria           varchar(60)
+  subcategoria        varchar(60)
+  marca              varchar(60)
+  unidad_medida       varchar(10)
+  costo_estandar      numeric(14,4)
+  precio_lista        numeric(14,4)
+  en_modelo           boolean      [not null, default: false, note: 'Si participa en el modelo de inventario óptimo']
+  activo              boolean      [not null, default: true]
+  valido_desde        timestamptz  [not null]
+  valido_hasta        timestamptz  [note: 'NULL = versión vigente']
+  es_vigente          boolean      [not null, default: true]
+  hash_atributos      char(32)     [note: 'Hash de los atributos versionados, para detectar cambios']
+  fecha_carga         timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (codigo_articulo, valido_desde) [unique]
+    (codigo_articulo) [name: 'ix_dim_articulo_codigo']
+    (es_vigente)
+  }
+  note: 'Dimensión de artículos con historización SCD tipo 2.'
+}
+
+Table core.dim_tienda {
+  sk_tienda               bigint       [pk, increment]
+  codigo_tienda           varchar(20)  [not null]
+  nombre_tienda           varchar(150)
+  departamento            varchar(60)
+  region                  varchar(60)
+  formato                 varchar(30)
+  es_centro_distribucion  boolean      [not null, default: false]
+  activa_modelo           boolean      [not null, default: false]
+  metros_cuadrados        integer
+  fecha_apertura          date
+  valido_desde            timestamptz  [not null]
+  valido_hasta            timestamptz
+  es_vigente              boolean      [not null, default: true]
+  hash_atributos          char(32)
+  fecha_carga             timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (codigo_tienda, valido_desde) [unique]
+    (codigo_tienda) [name: 'ix_dim_tienda_codigo']
+    (es_vigente)
+  }
+  note: 'Dimensión de tiendas con historización SCD tipo 2.'
+}
+
+// ============================================================================
+//  2. HECHOS  (definidos — schema core)
+// ============================================================================
+
+Table core.fct_venta {
+  sk_venta            bigint       [pk, increment]
+  id_transaccion      varchar(40)  [not null]
+  linea               smallint     [not null]
+  sk_fecha            integer      [not null, ref: > core.dim_fecha.sk_fecha]
+  fecha_hora          timestamptz  [not null]
+  sk_tienda           bigint       [not null, ref: > core.dim_tienda.sk_tienda]
+  sk_articulo         bigint       [not null, ref: > core.dim_articulo.sk_articulo]
+  unidades            numeric(14,3) [not null]
+  precio_unitario     numeric(14,4)
+  descuento           numeric(14,4) [not null, default: 0]
+  costo_unitario      numeric(14,4)
+  venta_neta          numeric(16,4) [note: 'unidades * precio_unitario - descuento']
+  costo_total         numeric(16,4) [note: 'unidades * costo_unitario']
+  estado              varchar(20)  [not null, note: 'CONFIRMADA | ANULADA | DEVOLUCION']
+  canal               varchar(20)
+  fecha_actualizacion timestamptz  [not null, note: 'Marca de cambio en el origen; base del upsert']
+  fecha_carga         timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (id_transaccion, linea) [unique, name: 'ux_fct_venta_natural']
+    (sk_fecha, sk_tienda)
+    (sk_articulo, sk_fecha)
+    (fecha_actualizacion)
+  }
+  note: 'Grano: una fila por línea de transacción. Se actualiza 3 veces al día.'
+}
+
+Table core.fct_inventario_diario {
+  sk_fecha                integer      [not null, ref: > core.dim_fecha.sk_fecha]
+  sk_tienda               bigint       [not null, ref: > core.dim_tienda.sk_tienda]
+  sk_articulo             bigint       [not null, ref: > core.dim_articulo.sk_articulo]
+  unidades_disponibles    numeric(14,3)
+  unidades_transito       numeric(14,3) [not null, default: 0]
+  unidades_comprometidas  numeric(14,3) [not null, default: 0]
+  costo_promedio          numeric(14,4)
+  valor_inventario        numeric(16,4) [note: 'unidades_disponibles * costo_promedio']
+  hora_snapshot           time
+  fecha_actualizacion     timestamptz
+  fecha_carga             timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (sk_fecha, sk_tienda, sk_articulo) [pk]
+    (sk_articulo, sk_fecha)
+  }
+  note: 'Snapshot de cierre diario. Grano: fecha x tienda x artículo. Tabla particionada por rango de sk_fecha.'
+}
+
+Table core.fct_inventario_intradia {
+  sk_fecha                integer      [not null, ref: > core.dim_fecha.sk_fecha]
+  hora_snapshot           time         [not null]
+  sk_tienda               bigint       [not null, ref: > core.dim_tienda.sk_tienda]
+  sk_articulo             bigint       [not null, ref: > core.dim_articulo.sk_articulo]
+  unidades_disponibles    numeric(14,3)
+  unidades_transito       numeric(14,3) [not null, default: 0]
+  unidades_comprometidas  numeric(14,3) [not null, default: 0]
+  costo_promedio          numeric(14,4)
+  fecha_actualizacion     timestamptz
+  fecha_carga             timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (sk_fecha, hora_snapshot, sk_tienda, sk_articulo) [pk]
+  }
+  note: 'Snapshot cada 30 minutos. Alimenta el cierre diario y el monitoreo de stockouts intradía.'
+}
+
+// ============================================================================
+//  3. CAPA RAW  (definida — schema raw)
+//  Aterrizaje sin transformar. Tipos text a propósito: aquí no se valida.
+// ============================================================================
+
+Table raw.stg_venta {
+  id_carga            bigint       [pk, increment]
+  archivo_origen      varchar(255) [not null]
+  linea_archivo       integer
+  payload             jsonb        [not null, note: 'Fila cruda tal como llegó']
+  fecha_carga         timestamptz  [not null, default: `now()`]
+  note: 'Landing de ventas. Permite reprocesar sin volver al origen.'
+}
+
+Table raw.stg_inventario {
+  id_carga            bigint       [pk, increment]
+  archivo_origen      varchar(255) [not null]
+  linea_archivo       integer
+  payload             jsonb        [not null]
+  fecha_carga         timestamptz  [not null, default: `now()`]
+}
+
+// ============================================================================
+//  4. CONTROL DE ETL  (definido — schema etl)
+// ============================================================================
+
+Table etl.ejecucion {
+  id_ejecucion        bigint       [pk, increment]
+  flujo               varchar(80)  [not null]
+  parametros          jsonb
+  estado              varchar(20)  [not null, note: 'EN_CURSO | EXITO | FALLO']
+  filas_leidas        integer      [default: 0]
+  filas_cargadas      integer      [default: 0]
+  filas_rechazadas    integer      [default: 0]
+  mensaje_error       text
+  iniciado_en         timestamptz  [not null, default: `now()`]
+  finalizado_en       timestamptz
+
+  indexes {
+    (flujo, iniciado_en)
+  }
+}
+
+Table etl.watermark {
+  flujo               varchar(80)  [pk]
+  valor               varchar(60)  [not null, note: 'Último valor procesado: fecha, timestamp o corte']
+  actualizado_en      timestamptz  [not null, default: `now()`]
+  note: 'Marca de agua por flujo. Habilita cargas incrementales y backfill.'
+}
+
+Table etl.rechazo {
+  id_rechazo          bigint       [pk, increment]
+  id_ejecucion        bigint       [not null, ref: > etl.ejecucion.id_ejecucion]
+  flujo               varchar(80)  [not null]
+  regla               varchar(120) [not null]
+  payload             jsonb        [not null]
+  detectado_en        timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (flujo, detectado_en)
+  }
+  note: 'Cuarentena de registros que no pasan validación.'
+}
+
+Table etl.archivo_procesado {
+  id_archivo          bigint       [pk, increment]
+  flujo               varchar(80)  [not null]
+  nombre_archivo      varchar(255) [not null]
+  hash_contenido      char(64)     [not null]
+  filas               integer
+  procesado_en        timestamptz  [not null, default: `now()`]
+
+  indexes {
+    (flujo, nombre_archivo) [unique]
+  }
+  note: 'Evita reprocesar el mismo archivo dos veces. Base de la idempotencia de la carga histórica.'
+}
+
+// ============================================================================
+//  5. AUTENTICACIÓN Y AUTORIZACIÓN  (schema app) — DEFINIDA
+//  Se entrega resuelta, con su DDL en sql/05_ddl_app.sql, como referencia de
+//  estilo y de nivel de detalle esperado para la sección 6.
+// ============================================================================
+
+Table app.usuario {
+  id_usuario            bigint       [pk, increment]
+  usuario               varchar(60)  [not null, unique]
+  correo                varchar(150) [not null, unique]
+  nombre_completo       varchar(150)
+  hash_contrasena       varchar(255) [not null]
+  requiere_cambio_pass  boolean      [not null, default: true, note: 'Contraseña temporal: se fuerza el cambio al primer ingreso']
+  activo                boolean      [not null, default: true]
+  ultimo_ingreso_en     timestamptz
+  creado_por            bigint       [ref: > app.usuario.id_usuario]
+  creado_en             timestamptz  [not null, default: `now()`]
+}
+
+Table app.sesion_token {
+  id_token      bigint      [pk, increment]
+  id_usuario    bigint      [not null, ref: > app.usuario.id_usuario]
+  hash_refresh  char(64)    [not null, unique]
+  emitido_en    timestamptz [not null, default: `now()`]
+  expira_en     timestamptz [not null]
+  revocado_en   timestamptz
+  note: 'Refresh tokens. Solo se guarda el hash.'
+}
+
+Table app.modulo {
+  id_modulo  smallint    [pk, increment]
+  codigo     varchar(40) [not null, unique, note: 'CATALOGO_ARTICULOS | CATALOGO_TIENDAS | INSTRUCCIONES | KPIS']
+  nombre     varchar(80) [not null]
+  activo     boolean     [not null, default: true]
+}
+
+Table app.permiso {
+  id_permiso smallint    [pk, increment]
+  codigo     varchar(20) [not null, unique, note: 'VER | CREAR | EDITAR | ELIMINAR']
+  nombre     varchar(60) [not null]
+}
+
+Table app.usuario_modulo_permiso {
+  id_usuario   bigint      [not null, ref: > app.usuario.id_usuario]
+  id_modulo    smallint    [not null, ref: > app.modulo.id_modulo]
+  id_permiso   smallint    [not null, ref: > app.permiso.id_permiso]
+  otorgado_por bigint      [ref: > app.usuario.id_usuario]
+  otorgado_en  timestamptz [not null, default: `now()`]
+
+  indexes {
+    (id_usuario, id_modulo, id_permiso) [pk]
+  }
+  note: 'Asignación usuario x módulo x permiso. La PK compuesta evita duplicados y sirve como índice de la consulta de permisos efectivos.'
+}
+
+// ============================================================================
+//  6. TODO — INSTRUCCIONES Y SU AUDITORÍA  (schema app)  ⬜ TU ENTREGABLE
+// ============================================================================
+//  Requisitos funcionales que el modelo debe soportar:
+//
+//   a) Una instrucción es una propuesta de transferencia generada por el
+//      modelo de IA: origen (tienda o CEDIS), destino, artículo, unidades a
+//      transferir y comentario.
+//   b) El módulo muestra las ÚLTIMAS instrucciones generadas. Las corridas
+//      del modelo son periódicas: debe poder distinguirse a qué corrida
+//      pertenece cada instrucción y cuál es la corrida vigente.
+//   c) Un usuario puede EDITAR una instrucción (típicamente las unidades o el
+//      comentario). Es obligatorio guardar registro de qué se modificó: qué
+//      campo, valor anterior, valor nuevo, quién y cuándo.
+//   d) Debe poder responderse: ¿cuáles instrucciones fueron alteradas por un
+//      humano respecto a lo que propuso el modelo, y en qué magnitud? Este
+//      dato alimenta un indicador de confianza en el modelo, así que la
+//      propuesta original no puede perderse cuando alguien la edita.
+//   e) Una instrucción tiene estados (propuesta, editada, aprobada,
+//      descartada, ejecutada) y el modelo debe impedir estados inválidos.
+//
+//  Decisiones que se evalúan y debes justificar en docs/MODELO.md:
+//   · ¿auditoría por campo (una fila por atributo modificado) o por versión
+//      completa de la instrucción? ¿qué gana y qué pierde tu opción?
+//   · ¿las instrucciones referencian la llave surrogada o la natural de
+//      artículo y tienda? Piensa qué pasa cuando la dimensión versiona
+//      (las dimensiones son SCD 2).
+//   · ¿el origen y el destino admiten cualquier tienda, o el modelo debe
+//      restringirlos? ¿qué impides a nivel de base de datos y qué dejas a la
+//      aplicación?
+//   · ¿cómo garantizas que haya una sola corrida vigente a la vez?
+//
+//  Define aquí las tablas con sus llaves, FKs, restricciones e índices, y
+//  escribe el DDL al final de sql/05_ddl_app.sql. La FK del usuario que
+//  edita debe apuntar a app.usuario (sección 5, ya entregada).
+// ============================================================================
+
+// Table app.corrida_modelo       { ... }
+// Table app.instruccion          { ... }
+// Table app.???                  { ... }
+
+// ============================================================================
+//  7. TODO — CAPA DE CONSUMO PARA KPIs  (schema analytics)  ⬜ TU ENTREGABLE
+// ============================================================================
+//  Los KPIs del módulo son: ventas mensuales, costo de inventario, margen,
+//  rotación, GMROI y stockouts.
+//
+//  Aquí no hay nada resuelto: la arquitectura de esta capa es tuya.
+//
+//  Contexto para decidir:
+//   · Hoy el módulo de KPIs consulta core.fct_venta y
+//     core.fct_inventario_diario directamente. Con 3 años de ventas y un año
+//     de inventario diario, cada filtro del dashboard recalcula todo.
+//   · El dashboard es interactivo: el usuario filtra por periodo, región,
+//     formato de tienda, categoría y subcategoría, y espera respuesta
+//     inmediata.
+//   · Los KPIs se consultan muchas veces al día; los datos se actualizan 3
+//     veces al día (ventas) y cada 30 minutos (inventario).
+//   · Rotación y GMROI son razones: no se suman ni se promedian entre niveles
+//     de agregación sin cuidado.
+//   · Las dimensiones son SCD 2: un mismo código de artículo tiene varias
+//     versiones con costos distintos.
+//
+//  Define las tablas, vistas o vistas materializadas que propongas, con su
+//  grano explícito, y justifica la arquitectura en docs/MODELO.md: qué
+//  estructura elegiste, a qué granos, cómo se mantiene actualizada y qué
+//  sacrificas. Documenta cada KPI en docs/KPIS.md.
+// ============================================================================
+
+// Table analytics.??? { ... }

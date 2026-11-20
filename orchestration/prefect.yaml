@@ -1,0 +1,41 @@
+# ============================================================================
+#  Despliegues de Prefect. El de catálogos está configurado como referencia.
+#  Registrar:  prefect deploy --all      (dentro del contenedor del worker)
+#  Ver estado: prefect deployment ls
+#
+#  ⬜ TODO (candidato): agregar los despliegues de ventas (3 cortes al día),
+#  inventario (cada 30 minutos) y cierre diario, con sus schedules,
+#  concurrencia y parámetros. Las cargas históricas NO van en el schedule.
+# ============================================================================
+name: etl-inventario-optimo
+prefect-version: 3.0.0
+
+deployments:
+  - name: catalogos-diario
+    entrypoint: orchestration/flows/etl_flows.py:flujo_catalogos
+    work_pool:
+      name: default
+    schedules:
+      - cron: "0 5 * * *"
+        timezone: "America/Guatemala"
+    parameters: {}
+
+  # - name: ventas-intradia
+  #   entrypoint: orchestration/flows/etl_flows.py:flujo_ventas
+  #   work_pool: { name: default }
+  #   schedules:
+  #     - cron: "?? ? * * *"       # TODO: 3 cortes al día
+  #   parameters: { corte: "0800" }
+
+  # - name: inventario-intradia
+  #   entrypoint: orchestration/flows/etl_flows.py:flujo_inventario
+  #   work_pool: { name: default }
+  #   schedules:
+  #     - cron: "?/?? * * * *"     # TODO: cada 30 minutos
+  #   concurrency_limit: 1         # TODO: ¿es lo correcto? justifícalo
+
+  # - name: cierre-diario
+  #   entrypoint: orchestration/flows/etl_flows.py:flujo_cierre
+  #   work_pool: { name: default }
+  #   schedules:
+  #     - cron: "?? ?? * * *"      # TODO: después del último snapshot

@@ -1,0 +1,46 @@
+# ============================================================================
+#  Base entregada: PostgreSQL con el DDL aplicado al arrancar + imagen del ETL.
+#  TODO (candidato): agregar el servicio del orquestador (ver
+#  docker-compose.prefect.yml / docker-compose.airflow.yml como punto de
+#  partida) y dejar todo ejecutable con la menor cantidad de comandos.
+# ============================================================================
+name: inventario-optimo
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: inv_postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-inventario_db}
+      POSTGRES_USER: ${POSTGRES_USER:-etl_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cambiame}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql/01_schemas.sql:/docker-entrypoint-initdb.d/01_schemas.sql:ro
+      - ./sql/02_ddl_core.sql:/docker-entrypoint-initdb.d/02_ddl_core.sql:ro
+      - ./sql/03_seed_dim_fecha.sql:/docker-entrypoint-initdb.d/03_seed_dim_fecha.sql:ro
+      # 05_ddl_app.sql y 06_analytics.sql los escribes tú y los aplicas a mano
+      # (ver README). Si quieres, móntalos aquí cuando estén listos.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-etl_user} -d ${POSTGRES_DB:-inventario_db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  etl:
+    build: .
+    container_name: inv_etl
+    env_file: .env
+    environment:
+      POSTGRES_HOST: postgres
+    volumes:
+      - ./data:/app/data:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles: ["tools"]      # se ejecuta a demanda: docker compose run --rm etl <comando>
+
+volumes:
+  pgdata:

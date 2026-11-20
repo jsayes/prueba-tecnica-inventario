@@ -1,0 +1,18 @@
+-- ============================================================================
+--  Schema analytics — TU ENTREGABLE
+--
+--  Capa de consumo de los KPIs: ventas mensuales, costo de inventario,
+--  margen, rotación, GMROI y stockouts.
+--
+--  Aquí no hay nada resuelto: la arquitectura de esta capa es tuya. El
+--  contexto para decidirla está en docs/modelo.dbml, sección 7.
+--
+--  Se evalúa, en este orden:
+--    1. la arquitectura que propones y su justificación (docs/MODELO.md);
+--    2. la definición de cada KPI: fórmula y grano (docs/KPIS.md);
+--    3. la implementación: al menos 3 de los 6 KPIs de punta a punta aquí.
+--
+--  Este archivo se aplica a mano, después de cargar datos:
+--    psql "postgresql://etl_user:cambiame@localhost:5432/inventario_db" \
+--         -f sql/06_analytics.sql
+-- ============================================================================
